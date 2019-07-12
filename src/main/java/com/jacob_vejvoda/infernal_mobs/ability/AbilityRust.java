@@ -7,6 +7,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import static org.bukkit.Material.AIR;
 
@@ -17,13 +19,17 @@ public class AbilityRust implements IAbility {
         ItemStack item = attacker.getInventory().getItemInMainHand();
         if (item == null || item.getType() == AIR || (item.hasItemMeta() && item.getItemMeta().isUnbreakable())) return;
         if (item.getType().getMaxDurability() < 1) return;
-        int damage = Math.round(20F / (item.getEnchantmentLevel(Enchantment.DURABILITY)+1F));
+        int damage = Math.round(20F / (item.getEnchantmentLevel(Enchantment.DURABILITY) + 1F));
         if (damage <= 0) damage = 1;
-        int newDamage = item.getDurability() + damage;
-        if (newDamage > item.getType().getMaxDurability()) {
-            item.setDurability((short) (item.getType().getMaxDurability()+1));
-        } else {
-            item.setDurability((short) newDamage);
+        ItemMeta meta = item.getItemMeta();
+        if (meta instanceof Damageable && ((Damageable) meta).hasDamage()) {
+            int newDamage = ((Damageable) meta).getDamage() + damage;
+            if (newDamage > item.getType().getMaxDurability()) {
+                ((Damageable) meta).setDamage((short) (item.getType().getMaxDurability() + 1));
+            } else {
+                ((Damageable) meta).setDamage((short) newDamage);
+            }
+            item.setItemMeta(meta);
         }
     }
 }

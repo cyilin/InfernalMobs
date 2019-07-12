@@ -72,12 +72,7 @@ public class LootConfig {
                 i.extraEnchants = new HashMap<>();
                 ConfigurationSection sec = s.getConfigurationSection("extraEnchants");
                 for (String ench : sec.getKeys(false)) {
-                    Enchantment enchantment = null;
-                    try {
-                        enchantment = Enchantment.getByKey(NamespacedKey.minecraft(ench));
-                    } catch (IllegalArgumentException e) {
-                        enchantment = Enchantment.getByName(ench);
-                    }
+                    Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(ench));
                     i.extraEnchants.put(enchantment, RangePair.parse(sec.getString(ench)));
                 }
             }

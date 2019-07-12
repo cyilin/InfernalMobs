@@ -6,7 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -24,23 +26,25 @@ public class LootItem {
      */
     public ItemStack get() {
         ItemStack ret = item.clone();
-        if (damageRange != null) {
+        ItemMeta meta = ret.getItemMeta();
+        if (damageRange != null && meta instanceof Damageable && ((Damageable) meta).hasDamage()) {
             short damageR = (short) damageRange.get();
             if (damageR < 0) damageR = 0;
             if (damageR >= ret.getType().getMaxDurability())
                 damageR = (short) (ret.getType().getMaxDurability() - 1);
-            ret.setDurability(damageR);
+            ((Damageable) meta).setDamage(damageR);
+            ret.setItemMeta(meta);
         }
         if (amountRange != null) {
             ret.setAmount(amountRange.get());
         }
         if (extraEnchants != null) {
             if (ret.getType() == Material.ENCHANTED_BOOK) {
-                EnchantmentStorageMeta meta = (EnchantmentStorageMeta) ret.getItemMeta();
+                EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) ret.getItemMeta();
                 for (Enchantment e : extraEnchants.keySet()) {
-                    meta.addStoredEnchant(e, extraEnchants.get(e).get(), true);
+                    enchantmentStorageMeta.addStoredEnchant(e, extraEnchants.get(e).get(), true);
                 }
-                ret.setItemMeta(meta);
+                ret.setItemMeta(enchantmentStorageMeta);
             } else {
                 for (Enchantment e : extraEnchants.keySet()) {
                     ret.addUnsafeEnchantment(e, extraEnchants.get(e).get());
